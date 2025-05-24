@@ -1,5 +1,3 @@
-cat << 'EOF' > README.md
-
 # Py_Firewall
 
 ## Overview
