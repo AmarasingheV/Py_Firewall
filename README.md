@@ -72,15 +72,15 @@ Features
 Troubleshooting
 
     Network Scan Issues:
-        Ensure nmap is installed and has proper permissions:
+        Ensure nmap is installed and has proper permissions: 
+        chmod +x /usr/bin/nmap
 
 
-chmod +x /usr/bin/nmap
 Verify the network range (e.g., 192.168.0.0/24) matches your network:
-bash
 
     ip addr
     Check firewall.log for errors.
+
 
 Permission Errors: Run the script as root (sudo).
 Port Conflicts: Ensure port 5000 is free, or modify the port in firewall.py.
