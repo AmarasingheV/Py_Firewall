@@ -31,3 +31,69 @@ This project is a Python-based firewall application with a web interface, develo
     ```bash
     chmod +x install_dependencies.sh
     ./install_dependencies.sh
+
+Installation
+
+    Clone the repository:
+    bash
+
+    git clone https://github.com/AmarasingheV/Py_Firewall.git
+    cd Py_Firewall
+    Install dependencies (as listed above).
+    Ensure the web directory contains dashboard.html, login.html, script.js, and style.css.
+
+Usage
+
+    Run the firewall script as root:
+    bash
+
+    sudo python3 firewall.py
+    Access the web interface at http://localhost:5000 in your browser.
+    Log in with the default credentials:
+        Username: admin
+        Password: admin123
+    Use the dashboard to:
+        Monitor network interfaces.
+        View and export logs.
+        Add/edit/delete firewall rules.
+        Manage users and aliases.
+        Perform network scans and manage blacklisted IPs.
+        Configure IDS/IPS settings.
+
+Features
+
+    Packet Filtering: Define rules to allow or drop packets based on source/destination IP, protocol, and ports.
+    IDS/IPS: Detect anomalies (e.g., high packet rates) and optionally auto-block IPs in IPS mode.
+    Network Scanning: Scan networks for open ports using nmap.
+    Blacklist Management: Manually blacklist IPs or remove them from the blacklist.
+    Aliases: Group IPs into aliases for easier rule management.
+    Logging: View and export packet logs.
+    User Management: Add, modify, or delete users via the web interface.
+
+Troubleshooting
+
+    Network Scan Issues:
+        Ensure nmap is installed and has proper permissions:
+        bash
+
+chmod +x /usr/bin/nmap
+Verify the network range (e.g., 192.168.0.0/24) matches your network:
+bash
+
+    ip addr
+    Check firewall.log for errors.
+
+Permission Errors: Run the script as root (sudo).
+Port Conflicts: Ensure port 5000 is free, or modify the port in firewall.py.
+
+Disclaimers
+
+    Educational Use Only: This firewall is intended for learning and testing purposes. It has not been thoroughly tested for production environments.
+    Security Risks: The application stores passwords in plain text (encrypted in users.json). For production use, implement proper password hashing (e.g., with bcrypt).
+    No Warranty: The software is provided "as is," without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose, and noninfringement. In no event shall the authors or copyright holders be liable for any claim, damages, or other liability, whether in an action of contract, tort, or otherwise, arising from, out of, or in connection with the software or the use or other dealings in the software.
+    Root Privileges: Running as root poses security risks. Use with caution and only in a controlled environment.
+    Network Impact: Misconfigured rules or scans may disrupt network traffic. Test in a safe environment first.
+
+License
+
+This project is licensed under the MIT License. See the LICENSE file for details.
