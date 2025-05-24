@@ -1,7 +1,7 @@
 # Py_Firewall
 
 ## Overview
-This project is a Python-based firewall application with a web interface, developed as part of a group project (COHNDNE241F-016 and COHNDNE241F-024). It is designed to monitor and control network traffic, offering features like packet filtering, anomaly detection (IDS/IPS), network scanning, blacklisting, and alias management. The application uses Flask for the web interface, Scapy for packet handling, and NetfilterQueue for packet filtering on Linux systems.
+This project is a Python-based firewall application with a web interface, developed as part of a group project. It is designed to monitor and control network traffic, offering features like packet filtering, anomaly detection (IDS/IPS), network scanning, blacklisting, and alias management. The application uses Flask for the web interface, Scapy for packet handling, and NetfilterQueue for packet filtering on Linux systems.
 
 **Note:** This project is for educational and testing purposes only. It is not intended for production use without proper security hardening and testing.
 
@@ -28,14 +28,14 @@ This project is a Python-based firewall application with a web interface, develo
 - **Python**: Version 3.6 or higher.
 - **Dependencies**:
   - Run the provided script to install dependencies:
-    ```bash
+    ```
     chmod +x install_dependencies.sh
     ./install_dependencies.sh
 
 Installation
 
     Clone the repository:
-    bash
+    
 
     git clone https://github.com/AmarasingheV/Py_Firewall.git
     cd Py_Firewall
@@ -45,7 +45,6 @@ Installation
 Usage
 
     Run the firewall script as root:
-    bash
 
     sudo python3 firewall.py
     Access the web interface at http://localhost:5000 in your browser.
@@ -74,7 +73,7 @@ Troubleshooting
 
     Network Scan Issues:
         Ensure nmap is installed and has proper permissions:
-        bash
+
 
 chmod +x /usr/bin/nmap
 Verify the network range (e.g., 192.168.0.0/24) matches your network:
