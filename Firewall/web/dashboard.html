@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firewall Dashboard</title>
+    <link rel="stylesheet" href="/style.css">
+    <script src="/script.js" defer></script>
+</head>
+<body class="dark-theme">
+    <div class="container">
+        <h1>Firewall Dashboard</h1>
+        <div class="top-right">
+            <span id="username">{{ username }}</span>
+            <button onclick="toggleNotifications()">Notifications (<span id="notification-count">0</span>)</button>
+            <button onclick="window.location.href='/logout'">Logout</button>
+        </div>
+        <div id="notification-box">
+            <ul id="notifications-list"></ul>
+            <button onclick="clearNotifications()">Clear Notifications</button>
+        </div>
+        <div class="tab">
+            <button class="tablinks active" onclick="openTab(event, 'Status')">Status</button>
+            <button class="tablinks" onclick="openTab(event, 'Logs')">Logs</button>
+            <button class="tablinks" onclick="openTab(event, 'Rules')">Rules</button>
+            <button class="tablinks" onclick="openTab(event, 'Users')">Users</button>
+            <button class="tablinks" onclick="openTab(event, 'Aliases')">Aliases</button>
+            <button class="tablinks" onclick="openTab(event, 'NetworkScan')">Network Scan</button>
+            <button class="tablinks" onclick="openTab(event, 'Blacklist')">Blacklist</button>
+            <button class="tablinks" onclick="openTab(event, 'NAT')">NAT</button>
+            <button class="tablinks" onclick="openTab(event, 'Clients')">Clients</button>
+        </div>
+        <div id="Status" class="tab-content active">
+            <h2>System Status</h2>
+            <div class="status-box">
+                <h3>CPU Usage: <span id="cpu-usage">{{ system_stats.cpu }}%</span></h3>
+                <h3>Memory Usage: <span id="memory-usage">{{ system_stats.memory }}%</span></h3>
+            </div>
+            <h2>Recent Logs</h2>
+            <table id="recent_logs">
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>Entry</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <h2>Network Interfaces</h2>
+            <table id="interface-table">
+                <thead>
+                    <tr>
+                        <th>Interface</th>
+                        <th>IP Address</th>
+                        <th>Bytes Sent</th>
+                        <th>Bytes Received</th>
+                        <th>Packets Sent</th>
+                        <th>Packets Received</th>
+                    </tr>
+                </thead>
+                <tbody id="interface-body"></tbody>
+            </table>
+        </div>
+        <div id="Logs" class="tab-content">
+            <h2>Logs</h2>
+            <div>
+                <button onclick="exportLogs()">Export Logs</button>
+            </div>
+            <pre id="logs"></pre>
+        </div>
+        <div id="Rules" class="tab-content">
+            <h2>Firewall Rules</h2>
+            <table id="rules-table" draggable="true">
+                <thead>
+                    <tr>
+                        <th>Order</th>
+                        <th>Source IP</th>
+                        <th>Destination IP</th>
+                        <th>Protocol</th>
+                        <th>Source Port</th>
+                        <th>Destination Port</th>
+                        <th>Action</th>
+                        <th>Operations</th>
+                    </tr>
+                </thead>
+                <tbody id="rules-body"></tbody>
+            </table>
+            <h3>Add/Edit Rule</h3>
+            <form id="rule-form">
+                <input type="hidden" id="edit-rule-index" value="-1">
+                <input type="text" id="src-ip" placeholder="Source IP (or alias)" list="alias-list">
+                <input type="text" id="dst-ip" placeholder="Destination IP (or alias)" list="alias-list">
+                <datalist id="alias-list"></datalist>
+                <select id="proto">
+                    <option value="any">Any</option>
+                    <option value="ICMP">ICMP</option>
+                    <option value="TCP">TCP</option>
+                    <option value="UDP">UDP</option>
+                    <option value="HTTP">HTTP (TCP 80)</option>
+                    <option value="HTTPS">HTTPS (TCP 443)</option>
+                    <option value="FTP">FTP (TCP 20/21)</option>
+                    <option value="SSH">SSH (TCP 22)</option>
+                    <option value="TELNET">Telnet (TCP 23)</option>
+                    <option value="SMTP">SMTP (TCP 25)</option>
+                    <option value="DNS">DNS (TCP/UDP 53)</option>
+                    <option value="POP3">POP3 (TCP 110)</option>
+                    <option value="IMAP">IMAP (TCP 143)</option>
+                    <option value="RDP">RDP (TCP 3389)</option>
+                    <option value="MYSQL">MySQL (TCP 3306)</option>
+                    <option value="POSTGRESQL">PostgreSQL (TCP 5432)</option>
+                    <option value="SNMP">SNMP (UDP 161/162)</option>
+                    <option value="LDAP">LDAP (TCP/UDP 389)</option>
+                    <option value="LDAPS">LDAPS (TCP 636)</option>
+                    <option value="NTP">NTP (UDP 123)</option>
+                    <option value="SIP">SIP (UDP 5060/5061)</option>
+                    <option value="TFTP">TFTP (UDP 69)</option>
+                    <option value="other">Other</option>
+                </select>
+                <input type="text" id="src-port" placeholder="Source Port">
+                <input type="text" id="dst-port" placeholder="Destination Port">
+                <select id="action">
+                    <option value="ALLOW">Allow</option>
+                    <option value="DROP">Drop</option>
+                </select>
+                <button type="button" onclick="submitRule()">Add Rule</button>
+                <button type="button" onclick="cancelEditRule()">Cancel Edit</button>
+            </form>
+        </div>
+        <div id="Users" class="tab-content">
+            <h2>Users</h2>
+            <table id="users-table">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Password</th>
+                        <th>Operations</th>
+                    </tr>
+                </thead>
+                <tbody id="users-body"></tbody>
+            </table>
+            <h3>Add User</h3>
+            <form id="add-user-form">
+                <input type="text" id="new-username" placeholder="Username">
+                <input type="password" id="new-password" placeholder="Password">
+                <button type="button" onclick="addUser()">Add User</button>
+            </form>
+            <h3>Modify User Password</h3>
+            <form id="modify-user-form">
+                <input type="text" id="modify-username" placeholder="Username">
+                <input type="password" id="modify-password" placeholder="New Password">
+                <button type="button" onclick="modifyUser()">Modify Password</button>
+            </form>
+        </div>
+        <div id="Aliases" class="tab-content">
+            <h2>Aliases</h2>
+            <table id="aliases-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>Entries</th>
+                        <th>Operations</th>
+                    </tr>
+                </thead>
+                <tbody id="aliases-body"></tbody>
+            </table>
+            <h3>Add/Edit Alias</h3>
+            <form id="alias-form">
+                <input type="hidden" id="edit-alias-index" value="-1">
+                <input type="text" id="alias-name" placeholder="Alias Name">
+                <input type="text" id="alias-desc" placeholder="Description">
+                <input type="text" id="alias-entries" placeholder="Entries (comma-separated IPs)">
+                <button type="button" onclick="submitAlias()">Add Alias</button>
+                <button type="button" onclick="cancelEditAlias()">Cancel Edit</button>
+            </form>
+            <h3>Upload Aliases from File</h3>
+            <form id="upload-alias-form" enctype="multipart/form-data">
+                <input type="text" name="name" placeholder="Alias Name">
+                <input type="text" name="description" placeholder="Description">
+                <input type="file" name="file">
+                <button type="button" onclick="uploadAliases()">Upload</button>
+            </form>
+        </div>
+        <div id="NetworkScan" class="tab-content">
+            <h2>Network Scan</h2>
+            <form id="scan-form">
+                <input type="text" id="scan-network" value="192.168.39.0/24" placeholder="Network (e.g., 192.168.39.0/24)">
+                <input type="text" id="scan-ports" value="1-1000" placeholder="Port Range (e.g., 1-1000)">
+                <button type="button" id="start-scan-button" onclick="startScan()">Start Scan</button>
+                <button type="button" onclick="stopScan()">Stop Scan</button>
+            </form>
+            <div id="scan-loading" style="display: none;"><span class="loader"></span>Scanning...</div>
+            <table id="scan-table">
+                <thead>
+                    <tr>
+                        <th>Host</th>
+                        <th>State</th>
+                        <th>Open Ports</th>
+                        <th>Packet Count (Anomaly)</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="scan-body"></tbody>
+            </table>
+            <h3>IDS/IPS Settings</h3>
+            <form id="ips-settings-form">
+                <label>Mode:
+                    <select id="ips-mode" onchange="toggleAutoBlockOption()">
+                        <option value="IDS">IDS (Monitor Only)</option>
+                        <option value="IPS">IPS (Auto-Block)</option>
+                    </select>
+                </label>
+                <label>Packet Threshold:
+                    <input type="number" id="ips-threshold" min="1">
+                </label>
+                <label>Auto-Block:
+                    <input type="checkbox" id="ips-auto-block">
+                </label>
+                <label>Block Duration (seconds):
+                    <input type="number" id="ips-block-duration" min="1">
+                </label>
+                <button type="button" onclick="saveIPSSettings()">Save Settings</button>
+            </form>
+        </div>
+        <div id="Blacklist" class="tab-content">
+            <h2>Blacklisted IPs</h2>
+            <table id="blacklist-table">
+                <thead>
+                    <tr>
+                        <th>IP</th>
+                        <th>Reason</th>
+                        <th>Added</th>
+                        <th>Temporary</th>
+                        <th>Operations</th>
+                    </tr>
+                </thead>
+                <tbody id="blacklist-body"></tbody>
+            </table>
+            <h3>Add Blacklist Entry</h3>
+            <form id="add-blacklist-form">
+                <input type="text" id="blacklist-ip" placeholder="IP Address">
+                <input type="text" id="blacklist-reason" placeholder="Reason (optional)">
+                <button type="button" id="blacklist-add-button">Add to Blacklist</button>
+            </form>
+            <form id="edit-blacklist-form" style="display: none;">
+                <input type="text" id="edit-blacklist-ip" readonly>
+                <input type="text" id="edit-blacklist-reason" placeholder="Reason">
+                <button type="button" onclick="saveBlacklistEdit()">Save</button>
+            </form>
+        </div>
+        <div id="NAT" class="tab-content">
+            <h2>NAT Rules</h2>
+            <table id="nat-table">
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Interface</th>
+                        <th>Protocol</th>
+                        <th>Original Port</th>
+                        <th>Destination IP</th>
+                        <th>Destination Port</th>
+                        <th>Source IP</th>
+                        <th>Operations</th>
+                    </tr>
+                </thead>
+                <tbody id="nat-body"></tbody>
+            </table>
+            <h3>Add NAT Rule</h3>
+            <form id="nat-form">
+                <select id="nat-type" onchange="toggleNATFields()">
+                    <option value="MASQUERADE">Dynamic NAT (Masquerade)</option>
+                    <option value="SNAT">Static NAT</option>
+                    <option value="PAT">PAT</option>
+                </select>
+                <input type="text" id="nat-interface" placeholder="Interface (e.g., eth0)">
+                <select id="nat-proto">
+                    <option value="tcp">TCP</option>
+                    <option value="udp">UDP</option>
+                </select>
+                <input type="text" id="nat-orig-port" placeholder="Original Port">
+                <input type="text" id="nat-dest-ip" placeholder="Destination IP">
+                <input type="text" id="nat-dest-port" placeholder="Destination Port">
+                <input type="text" id="nat-source-ip" placeholder="Source IP">
+                <button type="button" onclick="addNATRule()">Add NAT Rule</button>
+            </form>
+        </div>
+        <div id="Clients" class="tab-content">
+            <h2>Connected Clients</h2>
+            <table id="clients-table">
+                <thead>
+                    <tr>
+                        <th>IP Address</th>
+                        <th>MAC Address</th>
+                        <th>Interface</th>
+                        <th>Hostname</th>
+                    </tr>
+                </thead>
+                <tbody id="clients-body"></tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
